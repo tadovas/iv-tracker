@@ -1,27 +1,54 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/go-chi/chi"
+
+	"github.com/tadovas/iv-tracker/server"
+
+	"github.com/tadovas/iv-tracker/db"
+	"github.com/tadovas/iv-tracker/log"
 )
 
 func main() {
+	var dbFlags db.Flags
+	db.RegisterFlags(&dbFlags)
 
-	server := http.Server{}
+	var serverFlags server.Flags
+	server.RegisterFlags(&serverFlags)
+
+	flag.Parse()
+
+	DB, err := db.Setup(dbFlags)
+	failOnError(err)
+	failOnError(DB.Ping())
+
+	httpServer, err := server.Setup(serverFlags, chi.NewRouter())
+	failOnError(err)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, os.Kill)
 	go func() {
 		<-stop
-		if err := server.Close(); err != nil {
+		if err := httpServer.Close(); err != nil {
 			fmt.Println("Service stop error:", err)
 		}
 	}()
-
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		fmt.Println("Http service error:", err)
+	log.Info("Serving at", serverFlags.Address)
+	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+		log.Error("Http service error:", err)
 	}
-	fmt.Println("Terminated")
+	log.Info("Terminated")
+}
+
+func failOnError(err error) {
+	if err != nil {
+		log.Error("Init error:", err)
+		os.Exit(1)
+	}
 }
