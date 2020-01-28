@@ -4,13 +4,11 @@ services:
     image: mariadb:10.4.11
     environment:
       - MYSQL_DATABASE=iv_tracker
-      - MYSQL_USERNAME=iv_user
+      - MYSQL_USER=iv_user
       - MYSQL_PASSWORD=iv_password
-      -  MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     ports:
       - "3306:3306"
-    volumes:
-    - "./runtime/db:/var/lib/mysql"
 
   adminer:
     image: adminer
