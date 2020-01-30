@@ -6,6 +6,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+
+	"github.com/go-chi/chi/middleware"
+
+	"github.com/tadovas/iv-tracker/income"
+	"github.com/tadovas/iv-tracker/rest"
 
 	"github.com/go-chi/chi"
 
@@ -27,8 +33,21 @@ func main() {
 	DB, err := db.Setup(dbFlags)
 	failOnError(err)
 	failOnError(DB.Ping())
+	failOnError(db.Migrate(DB, filepath.Join("db", "migrations")))
 
-	httpServer, err := server.Setup(serverFlags, chi.NewRouter())
+	incomeRepository := income.Repository{
+		DB: DB,
+	}
+
+	globalRouter := chi.NewRouter()
+	globalRouter.Use(middleware.SetHeader("Content-type", "application/json"))
+
+	incomesRouter := globalRouter.Route("/incomes", nil)
+	incomesRouter.Post("/", rest.AddIncome(incomeRepository))
+	incomesRouter.Get("/years", rest.ListIncomeYears(incomeRepository))
+	incomesRouter.Get("/{year}", rest.ListIncomesByYear(incomeRepository))
+
+	httpServer, err := server.Setup(serverFlags, globalRouter)
 	failOnError(err)
 
 	stop := make(chan os.Signal, 1)
