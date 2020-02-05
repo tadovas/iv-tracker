@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"path/filepath"
 
+	"github.com/tadovas/iv-tracker/saving"
+
 	"github.com/tadovas/iv-tracker/tax"
 
 	"github.com/go-chi/chi/middleware"
@@ -43,6 +45,8 @@ func main() {
 
 	taxCalcLoader := tax.CalculatorDBLoader{DB: DB}
 
+	savingsRepository := saving.Repository{DB: DB}
+
 	globalRouter := chi.NewRouter()
 	globalRouter.Use(middleware.SetHeader("Content-type", "application/json"))
 
@@ -52,7 +56,11 @@ func main() {
 	incomesRouter.Get("/{year}", rest.ListIncomesByYear(incomeRepository))
 
 	taxesRouter := globalRouter.Route("/taxes", nil)
-	taxesRouter.Get("/{year}", rest.TaxSummaryView(incomeRepository, taxCalcLoader))
+	taxesRouter.Get("/{year}", rest.TaxSummaryView(incomeRepository, savingsRepository, taxCalcLoader))
+
+	savingsRouter := globalRouter.Route("/savings", nil)
+	savingsRouter.Post("/", rest.AddNewSaving(savingsRepository))
+	savingsRouter.Get("/{year}", rest.ListSavings(savingsRepository))
 
 	httpServer, err := server.Setup(serverFlags, globalRouter)
 	failOnError(err)
