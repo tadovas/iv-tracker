@@ -32,6 +32,9 @@ func main() {
 	var serverFlags server.Flags
 	server.RegisterFlags(&serverFlags)
 
+	var credentials rest.Credentials
+	rest.RegisterFlags(&credentials)
+
 	flag.Parse()
 
 	DB, err := db.Setup(dbFlags)
@@ -49,6 +52,10 @@ func main() {
 
 	globalRouter := chi.NewRouter()
 	globalRouter.Use(middleware.SetHeader("Content-type", "application/json"))
+	if credentials.IsSet() {
+		log.Info("Basic auth enabled for user: ", credentials.Username)
+		globalRouter.Use(rest.BasicAuth(credentials))
+	}
 
 	incomesRouter := globalRouter.Route("/incomes", nil)
 	incomesRouter.Post("/", rest.AddIncome(incomeRepository))
