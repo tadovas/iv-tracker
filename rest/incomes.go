@@ -40,9 +40,9 @@ func AddIncome(repository income.Repository) http.HandlerFunc {
 }
 
 type yearObject struct {
-	Year   string  `json:"year"`
-	Amount float64 `json:"total"`
-	Count  int     `json:"count"`
+	Year   string       `json:"year"`
+	Amount income.Money `json:"total"`
+	Count  int          `json:"count"`
 }
 type yearsResponse struct {
 	Years []yearObject `json:"years"`
@@ -59,7 +59,7 @@ func ListIncomeYears(repository income.Repository) http.HandlerFunc {
 		for _, yearSummary := range yearSummaries {
 			yearsResp.Years = append(yearsResp.Years, yearObject{
 				Year:   fmt.Sprint(yearSummary.Year),
-				Amount: float64(yearSummary.TotalAmount),
+				Amount: yearSummary.TotalAmount,
 				Count:  yearSummary.TotalIncomes,
 			})
 		}

@@ -10,8 +10,6 @@ import (
 
 type ID int
 
-type Money float64
-
 type CountryCode string
 
 type Year int
@@ -22,6 +20,16 @@ type Income struct {
 	Date    time.Time
 	Origin  CountryCode
 	Comment string
+}
+
+type IncomeList []Income
+
+func (il IncomeList) Total() Money {
+	var res Money
+	for _, income := range il {
+		res = res.Add(income.Amount)
+	}
+	return res
 }
 
 type Repository struct {
@@ -46,7 +54,7 @@ func (repo Repository) AddNewIncome(income Income) (ID, error) {
 	return ID(id), nil
 }
 
-func (repo Repository) ListIncomesByYear(year Year) ([]Income, error) {
+func (repo Repository) ListIncomesByYear(year Year) (IncomeList, error) {
 
 	rows, err := repo.DB.Query("SELECT id, amount, earned,origin, comment FROM incomes WHERE year=? ORDER BY earned DESC", year)
 	if err != nil {
@@ -54,18 +62,18 @@ func (repo Repository) ListIncomesByYear(year Year) ([]Income, error) {
 	}
 	defer log.IfError("list incomes rows close", rows.Close)
 
-	var incomes []Income
+	var incomeList IncomeList
 	for rows.Next() {
 		var income Income
 		if err := rows.Scan(&income.ID, &income.Amount, &income.Date, &income.Origin, &income.Comment); err != nil {
 			return nil, fmt.Errorf("list income row scan error: %w", err)
 		}
-		incomes = append(incomes, income)
+		incomeList = append(incomeList, income)
 	}
 	if rows.Err() != nil {
 		return nil, fmt.Errorf("list income row iterator error: %w", err)
 	}
-	return incomes, nil
+	return incomeList, nil
 }
 
 type YearSummary struct {
