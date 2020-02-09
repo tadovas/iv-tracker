@@ -24,6 +24,7 @@ func RegisterFlags(dbFlags *Flags) {
 
 func Setup(dbFlags Flags) (*sql.DB, error) {
 	config := mysql.NewConfig()
+	config.Net = "tcp"
 	config.Addr = dbFlags.Host
 	config.User = dbFlags.Username
 	config.Passwd = dbFlags.Password
