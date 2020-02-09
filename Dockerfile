@@ -7,5 +7,6 @@ RUN go build -o iv_tracker cmd/main.go
 FROM alpine:3.11.3
 
 WORKDIR /go/run
+COPY db/migrations db/migrations
 COPY --from=builder /go/build/iv_tracker iv_tracker
 ENTRYPOINT ["./iv_tracker"]
