@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/tadovas/iv-tracker/saving"
-
 	"github.com/go-chi/chi"
 	"github.com/tadovas/iv-tracker/income"
 	"github.com/tadovas/iv-tracker/log"
+	"github.com/tadovas/iv-tracker/saving"
 	"github.com/tadovas/iv-tracker/tax"
 )
 
@@ -20,9 +19,10 @@ type TaxView struct {
 }
 
 type TaxSummary struct {
-	Income income.Money
-	Saved  income.Money
-	Taxes  TaxView
+	Income     income.Money
+	Saved      income.Money
+	NeedToSave income.Money `json:"need_to_save"`
+	Taxes      TaxView
 }
 
 func TaxSummaryView(incomeRepo income.Repository, savingsRepo saving.Repository, taxCalcLoader tax.CalculatorDBLoader) http.HandlerFunc {
@@ -58,8 +58,9 @@ func TaxSummaryView(incomeRepo income.Repository, savingsRepo saving.Repository,
 		}
 
 		taxSummary := TaxSummary{
-			Income: incomeList.Total(),
-			Saved:  savingList.TotalSaved(),
+			Income:     incomeList.Total(),
+			Saved:      savingList.TotalSaved(),
+			NeedToSave: taxList.TotalTaxAmount().Sub(savingList.TotalSaved()),
 			Taxes: TaxView{
 				Taxes: taxList,
 				Total: taxList.TotalTaxAmount(),
