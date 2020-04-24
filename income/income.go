@@ -103,3 +103,29 @@ func (repo Repository) ListAllYears() ([]YearSummary, error) {
 
 	return years, nil
 }
+
+type CountryIncome struct {
+	Country      CountryCode
+	TotalIncome  Money
+	TotalRecords int
+}
+
+func (repo Repository) YearlyIncomesByCountry(year Year) ([]CountryIncome, error) {
+	var countryIncomes []CountryIncome
+	rows, err := repo.DB.Query("SELECT count(id), sum(amount), origin FROM incomes WHERE year = ? GROUP BY origin", year)
+	if err != nil {
+		return countryIncomes, fmt.Errorf("query build: %v", err)
+	}
+	defer log.IfError("query close", rows.Close)
+	for rows.Next() {
+		var countryIncome CountryIncome
+		if err := rows.Scan(&countryIncome.TotalRecords, &countryIncome.TotalIncome, &countryIncome.Country); err != nil {
+			return countryIncomes, fmt.Errorf("query scan: %v", err)
+		}
+		countryIncomes = append(countryIncomes, countryIncome)
+	}
+	if rows.Err() != nil {
+		return countryIncomes, fmt.Errorf("result iterate: %v", err)
+	}
+	return countryIncomes, nil
+}

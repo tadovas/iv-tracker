@@ -90,3 +90,25 @@ func ListIncomesByYear(repository income.Repository) http.HandlerFunc {
 		})
 	}
 }
+
+func YearlyIncomeDeclaration(repository income.Repository) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		year, err := strconv.Atoi(chi.URLParam(request, "year"))
+		if err != nil {
+			http.Error(writer, fmt.Sprintf("URL param parse error: %v", err), http.StatusBadRequest)
+			return
+		}
+		countryIncomes, err := repository.YearlyIncomesByCountry(income.Year(year))
+		if err != nil {
+			http.Error(writer, fmt.Sprintf("Incomes query error: %v", err), http.StatusInternalServerError)
+			return
+		}
+		var incomesResponse struct {
+			Declaration []income.CountryIncome `json:"declaration"`
+		}
+		incomesResponse.Declaration = countryIncomes
+		log.IfError("render incomes", func() error {
+			return json.NewEncoder(writer).Encode(&incomesResponse)
+		})
+	}
+}

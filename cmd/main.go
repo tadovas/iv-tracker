@@ -61,6 +61,7 @@ func main() {
 	incomesRouter.Post("/", rest.AddIncome(incomeRepository))
 	incomesRouter.Get("/years", rest.ListIncomeYears(incomeRepository))
 	incomesRouter.Get("/{year}", rest.ListIncomesByYear(incomeRepository))
+	incomesRouter.Get("/{year}/declaration", rest.YearlyIncomeDeclaration(incomeRepository))
 
 	taxesRouter := globalRouter.Route("/taxes", nil)
 	taxesRouter.Get("/{year}", rest.TaxSummaryView(incomeRepository, savingsRepository, taxCalcLoader))
