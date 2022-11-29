@@ -8,23 +8,17 @@ import (
 	"os/signal"
 	"path/filepath"
 
-	"github.com/tadovas/iv-tracker/reports"
-
-	"github.com/tadovas/iv-tracker/saving"
-
-	"github.com/tadovas/iv-tracker/tax"
-
+	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/tadovas/iv-tracker/income"
-	"github.com/tadovas/iv-tracker/rest"
-
-	"github.com/go-chi/chi"
-
-	"github.com/tadovas/iv-tracker/server"
-
 	"github.com/tadovas/iv-tracker/db"
+	"github.com/tadovas/iv-tracker/income"
 	"github.com/tadovas/iv-tracker/log"
+	"github.com/tadovas/iv-tracker/reports"
+	"github.com/tadovas/iv-tracker/rest"
+	"github.com/tadovas/iv-tracker/saving"
+	"github.com/tadovas/iv-tracker/server"
+	"github.com/tadovas/iv-tracker/tax"
 )
 
 func main() {
