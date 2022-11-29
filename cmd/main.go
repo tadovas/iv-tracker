@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"path/filepath"
 
+	"github.com/tadovas/iv-tracker/reports"
+
 	"github.com/tadovas/iv-tracker/saving"
 
 	"github.com/tadovas/iv-tracker/tax"
@@ -50,6 +52,8 @@ func main() {
 
 	savingsRepository := saving.Repository{DB: DB}
 
+	reportsGenerator := reports.JournalGenerator{IncomeRepository: incomeRepository}
+
 	globalRouter := chi.NewRouter()
 	globalRouter.Use(middleware.SetHeader("Content-type", "application/json"))
 	if credentials.IsSet() {
@@ -69,6 +73,9 @@ func main() {
 	savingsRouter := globalRouter.Route("/savings", nil)
 	savingsRouter.Post("/", rest.AddNewSaving(savingsRepository))
 	savingsRouter.Get("/{year}", rest.ListSavings(savingsRepository))
+
+	reportsRouter := globalRouter.Route("/reports", nil)
+	reportsRouter.Get("/journal", rest.GenerateIncomeExpenseJournal(reportsGenerator))
 
 	httpServer, err := server.Setup(serverFlags, globalRouter)
 	failOnError(err)

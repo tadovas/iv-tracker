@@ -54,3 +54,8 @@ func (m Money) Value() (driver.Value, error) {
 	d := (decimal.Decimal)(m)
 	return d.Value()
 }
+
+func (m Money) String() string {
+	d := (decimal.Decimal)(m)
+	return d.Round(2).String()
+}
