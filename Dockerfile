@@ -1,10 +1,10 @@
-FROM golang:1.13.7-alpine3.11 AS builder
+FROM golang:1.19.5-alpine3.17 AS builder
 
 WORKDIR /go/build
 COPY . .
 RUN go build -o iv_tracker cmd/main.go
 
-FROM alpine:3.11.3
+FROM alpine:3.17.1
 
 WORKDIR /go/run
 COPY db/migrations db/migrations
