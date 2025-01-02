@@ -1,12 +1,12 @@
 -- +goose Up
 
-INSERT INTO gpm_tax(year, percentage) VALUES(2024, 0.15);
+INSERT INTO gpm_tax(year, percentage) VALUES(2025, 0.15);
 
-INSERT INTO social_base(year, vdu, count, percentage) VALUES(2024,2108.88 ,43 , 0.9);
+INSERT INTO social_base(year, vdu, count, percentage) VALUES(2025,2108.88 ,43 , 0.9);
 
-INSERT INTO vsd_tax(year, percentage) VALUES(2024, 0.1252);
+INSERT INTO vsd_tax(year, percentage) VALUES(2025, 0.1252);
 
-INSERT INTO psd_tax(year, percentage) VALUES(2024, 0.0698);
+INSERT INTO psd_tax(year, percentage) VALUES(2025, 0.0698);
 
 
 -- +goose Down
